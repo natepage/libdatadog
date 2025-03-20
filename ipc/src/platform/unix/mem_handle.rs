@@ -18,7 +18,7 @@ use std::io;
 use std::num::NonZeroUsize;
 use std::os::unix::fs::MetadataExt;
 use std::sync::atomic::{AtomicI32, Ordering};
-use tracing::{trace};
+use tracing::{debug};
 
 fn shm_open<P: ?Sized + NixPath>(
     name: &P,
@@ -28,31 +28,31 @@ fn shm_open<P: ?Sized + NixPath>(
     mman::shm_open(name, flag, mode).or_else(|e| {
         if e == Errno::ENOTSUP {
             // Add some trace logging to confirm which path the code is going through
-            trace!("Got ENOTSUP so prefixing path with /tmp.");
+            debug!("Got ENOTSUP so prefixing path with /tmp.");
             // The path has a leading slash
             let path = name.with_nix_path(|cstr| {
                 let mut path = "/tmp/libdatadog".to_string().into_bytes();
                 path.extend_from_slice(cstr.to_bytes_with_nul());
                 unsafe { CString::from_vec_with_nul_unchecked(path) }
             })?;
-            trace!("path is now {path:?}.");
+            debug!("path is now {path:?}.");
             open(path.as_c_str(), flag, mode)
                 .or_else(|e| {
                     if (flag & OFlag::O_CREAT) == OFlag::O_CREAT && e == Errno::ENOENT {
-                        trace!("Attempting to create dir because open failed.");
+                        debug!("Attempting to create dir because open failed.");
                         #[allow(clippy::unwrap_used)]
                         mkdir(c"/tmp/libdatadog", Mode::from_bits(0o1777).unwrap())?;
                         // work around umask(2).
                         unsafe { chmod(c"/tmp/libdatadog".as_ptr(), 0o1777) };
                         open(path.as_c_str(), flag, mode)
                     } else {
-                        trace!("Did not go through dir creation logic.");
+                        debug!("Did not go through dir creation logic.");
                         Err(e)
                     }
                 })
                 .map(|fd| unsafe { std::os::fd::FromRawFd::from_raw_fd(fd) })
         } else {
-            trace!("Error was different than ENOTSUP.");
+            debug!("Error was different than ENOTSUP.");
             Err(e)
         }
     })
