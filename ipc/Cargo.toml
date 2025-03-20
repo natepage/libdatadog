@@ -18,6 +18,7 @@ tokio-serde = { version = "0.8", features = ["bincode"] }
 tokio-util = { version = "0.7.11", features = ["codec"] }
 libc = { version = "0.2" }
 tinybytes = { path = "../tinybytes", optional = true }
+tracing = { version = "0.1.40", default-features = false }
 
 # tarpc needed extensions to allow 1 way communication and to export some internal structs
 tarpc = { path = "tarpc/tarpc", default-features = false, features = ["serde-transport"], package = "tarpc" }
