@@ -52,7 +52,7 @@ fn shm_open<P: ?Sized + NixPath>(
                 })
                 .map(|fd| unsafe { std::os::fd::FromRawFd::from_raw_fd(fd) })
         } else {
-            debug!("Error was different than ENOTSUP.");
+            debug!("Error was different than ENOTSUP. Got {e:?}.");
             Err(e)
         }
     })
