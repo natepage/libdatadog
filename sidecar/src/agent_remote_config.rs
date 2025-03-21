@@ -30,7 +30,7 @@ fn path_for_endpoint(endpoint: &Endpoint) -> CString {
 
     #[allow(clippy::unwrap_used)]
     CString::new(format!(
-        "/tmp/ddcfg-{}-{}", // short enough because 31 character macos limitation
+        "/ddcfg-{}-{}", // short enough because 31 character macos limitation
         primary_sidecar_identifier(),
         hasher.finish()
     ))

@@ -46,7 +46,7 @@ fn shm_open<P: ?Sized + NixPath>(
                         unsafe { chmod(c"/tmp/libdatadog".as_ptr(), 0o1777) };
                         open(path.as_c_str(), flag, mode)
                     } else {
-                        debug!("Did not go through dir creation logic.");
+                        debug!("Did not go through dir creation logic. Got error {e:?}.");
                         Err(e)
                     }
                 })
