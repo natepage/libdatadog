@@ -35,7 +35,7 @@ fn shm_open<P: ?Sized + NixPath>(
                 path.extend_from_slice(cstr.to_bytes_with_nul());
                 unsafe { CString::from_vec_with_nul_unchecked(path) }
             })?;
-            debug!("path is now {path:?}.")
+            debug!("path is now {path:?}.");
             open(path.as_c_str(), flag, mode)
                 .or_else(|e| {
                     if (flag & OFlag::O_CREAT) == OFlag::O_CREAT && e == Errno::ENOENT {
