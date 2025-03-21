@@ -26,16 +26,16 @@ fn shm_open<P: ?Sized + NixPath>(
     mode: Mode,
 ) -> nix::Result<std::os::unix::io::OwnedFd> {
     mman::shm_open(name, flag, mode).or_else(|e| {
-        if e == Errno::ENOTSUP {
+        if e == Errno::ENOSYS {
             // Add some trace logging to confirm which path the code is going through
-            debug!("Got ENOTSUP so prefixing path with /tmp.");
+            debug!("Got ENOSYS so prefixing path with /tmp.");
             // The path has a leading slash
             let path = name.with_nix_path(|cstr| {
                 let mut path = "/tmp/libdatadog".to_string().into_bytes();
                 path.extend_from_slice(cstr.to_bytes_with_nul());
                 unsafe { CString::from_vec_with_nul_unchecked(path) }
             })?;
-            debug!("path is now {path:?}.");
+            debug!("path is now {path:?}.")
             open(path.as_c_str(), flag, mode)
                 .or_else(|e| {
                     if (flag & OFlag::O_CREAT) == OFlag::O_CREAT && e == Errno::ENOENT {
@@ -52,7 +52,7 @@ fn shm_open<P: ?Sized + NixPath>(
                 })
                 .map(|fd| unsafe { std::os::fd::FromRawFd::from_raw_fd(fd) })
         } else {
-            debug!("Error was different than ENOTSUP. Got {e:?}.");
+            debug!("Error was different than ENOSYS. Got {e:?}.");
             Err(e)
         }
     })
@@ -60,7 +60,7 @@ fn shm_open<P: ?Sized + NixPath>(
 
 pub fn shm_unlink<P: ?Sized + NixPath>(name: &P) -> nix::Result<()> {
     mman::shm_unlink(name).or_else(|e| {
-        if e == Errno::ENOTSUP {
+        if e == Errno::ENOSYS {
             unlink(name)
         } else {
             Err(e)
