@@ -38,7 +38,7 @@ fn shm_open<P: ?Sized + NixPath>(
             debug!("path is now {path:?}.");
             open(path.as_c_str(), flag, mode)
                 .or_else(|e| {
-                    if (flag & OFlag::O_CREAT) == OFlag::O_CREAT && e == Errno::ENOENT {
+                    if (flag & OFlag::O_CREAT) && e == Errno::ENOENT {
                         debug!("Attempting to create dir because open failed.");
                         #[allow(clippy::unwrap_used)]
                         mkdir(c"/tmp/libdatadog", Mode::from_bits(0o1777).unwrap())?;
